@@ -5,74 +5,68 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: alehamad <alehamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/03 14:40:20 by alehamad          #+#    #+#             */
-/*   Updated: 2026/02/03 15:00:10 by alehamad         ###   ########.fr       */
+/*   Created: 2026/02/03 15:01:18 by alehamad          #+#    #+#             */
+/*   Updated: 2026/02/03 22:51:39 by alehamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-long long	my_get_time(void)
+int	is_dead(t_data *data)
 {
-	struct timeval	tv;
+	int	dead;
 
-	gettimeofday(&tv, NULL);
-	return ((tv.tv_sec * 1000LL) + (tv.tv_usec / 1000));
+	pthread_mutex_lock(&data->death);
+	dead = data->dead;
+	pthread_mutex_unlock(&data->death);
+	return (dead);
 }
 
-void	my_usleep(long long duration_ms)
+int	take_forks(t_philo *philo, pthread_mutex_t *first, pthread_mutex_t *second)
 {
-	long long	start;
-	long long	now;
-	long long	left;
-
-	start = my_get_time();
-	while (1)
+	if (is_dead(philo->data))
+		return (0);
+	pthread_mutex_lock(first);
+	write_philo(philo, FORK);
+	if (is_dead(philo->data))
 	{
-		now = my_get_time();
-		left = duration_ms - (now - start);
-		if (left <= 0)
-			break ;
-		if (left > 10)
-			usleep(1000);
-		else
-			usleep(100);
+		pthread_mutex_unlock(first);
+		return (0);
 	}
+	pthread_mutex_lock(second);
+	write_philo(philo, FORK);
+	if (is_dead(philo->data))
+	{
+		pthread_mutex_unlock(second);
+		pthread_mutex_unlock(first);
+		return (0);
+	}
+	return (1);
 }
 
-void	my_pthread_destroy(t_data *data)
+void	eat_philo(t_philo *philo)
 {
-	int	i;
+	pthread_mutex_t	*first;
+	pthread_mutex_t	*second;
 
-	i = 0;
-	if (data->philo)
+	if (philo->left < philo->right)
 	{
-		while (i < data->nbr_philo)
-		{
-			pthread_mutex_destroy(&data->philo[i].meal);
-			i++;
-		}
-		free(data->philo);
+		first = philo->left;
+		second = philo->right;
 	}
-	i = 0;
-	if (data->forks)
+	else
 	{
-		while (i < data->nbr_philo)
-		{
-			pthread_mutex_destroy(&data->forks[i]);
-			i++;
-		}
-		free(data->forks);
+		first = philo->right;
+		second = philo->left;
 	}
-	pthread_mutex_destroy(&data->print);
-	pthread_mutex_destroy(&data->death);
-	pthread_mutex_destroy(&data->time);
-}
-
-void	my_free_data(t_data *data)
-{
-	if (!data)
+	if (!take_forks(philo, first, second))
 		return ;
-	my_pthread_destroy(data);
-	free(data);
+	pthread_mutex_lock(&philo->meal);
+	philo->last_meal = my_get_time();
+	philo->eat_count++;
+	pthread_mutex_unlock(&philo->meal);
+	write_philo(philo, EAT);
+	my_usleep(philo->data->t_to_eat);
+	pthread_mutex_unlock(second);
+	pthread_mutex_unlock(first);
 }

@@ -6,7 +6,7 @@
 /*   By: alehamad <alehamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 14:40:22 by alehamad          #+#    #+#             */
-/*   Updated: 2026/02/03 15:00:06 by alehamad         ###   ########.fr       */
+/*   Updated: 2026/02/03 22:51:35 by alehamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,29 +29,29 @@ void	ft_philo(t_data *data)
 {
 	int	i;
 
-	i = 0;
+	i = -1;
 	if (data->nbr_philo == 1)
 	{
 		one_philo(data);
 		return ;
 	}
 	data->t_start = my_get_time();
-	while (i < data->nbr_philo)
+	while (++i < data->nbr_philo)
 	{
 		pthread_mutex_lock(&data->philo[i].meal);
 		data->philo[i].last_meal = data->t_start;
 		pthread_mutex_unlock(&data->philo[i].meal);
-		pthread_create(&data->philo[i].thread, NULL,
-			routine_philo, &data->philo[i]);
-		i++;
+		if (pthread_create(&data->philo[i].thread, NULL,
+				routine_philo, &data->philo[i]) != 0)
+		{
+			pthread_mutex_lock(&data->death);
+			data->dead = 1;
+			pthread_mutex_unlock(&data->death);
+			break ;
+		}
+		data->threads_count++;
 	}
 	monitor(data);
-	i = 0;
-	while (i < data->nbr_philo)
-	{
-		pthread_join(data->philo[i].thread, NULL);
-		i++;
-	}
 }
 
 void	write_philo(t_philo *philo, int state)
@@ -66,7 +66,7 @@ void	write_philo(t_philo *philo, int state)
 	if (dead && state != DIED)
 	{
 		pthread_mutex_unlock(&philo->data->print);
-		return;
+		return ;
 	}
 	timestamp = my_get_time() - philo->data->t_start;
 	if (state == FORK)

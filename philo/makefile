@@ -6,11 +6,12 @@ HEADER  = philo.h
 SRCS	= main.c \
 			parsing.c \
 			philo.c \
-			utils.c \
+			time_sleep.c \
 			init.c \
 			monitoring.c \
 			routine.c \
-			utils_philo.c
+			utils.c \
+			free_destroy.c
 
 OBJS	= $(SRCS:.c=.o)
 

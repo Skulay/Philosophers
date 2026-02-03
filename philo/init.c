@@ -6,7 +6,7 @@
 /*   By: alehamad <alehamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 14:40:09 by alehamad          #+#    #+#             */
-/*   Updated: 2026/02/03 15:03:07 by alehamad         ###   ########.fr       */
+/*   Updated: 2026/02/03 22:51:31 by alehamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ static int	init_philo(t_data *data)
 		data->philo[i].data = data;
 		if (pthread_mutex_init(&data->philo[i].meal, NULL) != 0)
 			return (0);
+		data->meal_count++;
 		i++;
 	}
 	return (1);
@@ -47,6 +48,7 @@ static int	init_forks(t_data *data)
 	{
 		if (pthread_mutex_init(&data->forks[i], NULL) != 0)
 			return (0);
+		data->mutex_count++;
 		i++;
 	}
 	return (1);
@@ -56,20 +58,28 @@ static int	init_mutex(t_data *data)
 {
 	if (pthread_mutex_init(&data->print, NULL) != 0)
 		return (0);
+	data->print_ok = 1;
 	if (pthread_mutex_init(&data->death, NULL) != 0)
 		return (0);
+	data->death_ok = 1;
 	if (pthread_mutex_init(&data->time, NULL) != 0)
 		return (0);
+	data->time_ok = 1;
 	return (1);
 }
 
 static int	init_data(t_data *data, char **av, int eat)
 {
+	int	i;
+
 	data->nbr_philo = ft_atoi(av[1]);
 	data->t_to_die = ft_atoi(av[2]);
 	data->t_to_eat = ft_atoi(av[3]);
 	data->t_to_sleep = ft_atoi(av[4]);
-	data->t_to_think = (data->t_to_die - (data->t_to_eat + data->t_to_sleep)) - 20;
+	i = (data->t_to_die - (data->t_to_eat + data->t_to_sleep)) - 20;
+	data->t_to_think = i;
+	if (data->t_to_think < 0)
+		data->t_to_think = 0;
 	if (eat)
 		data->nbr_eat = ft_atoi(av[5]);
 	else
@@ -78,6 +88,12 @@ static int	init_data(t_data *data, char **av, int eat)
 	data->forks = NULL;
 	data->philo = NULL;
 	data->dead = 0;
+	data->death_ok = 0;
+	data->print_ok = 0;
+	data->time_ok = 0;
+	data->meal_count = 0;
+	data->threads_count = 0;
+	data->mutex_count = 0;
 	return (1);
 }
 

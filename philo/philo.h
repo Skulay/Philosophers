@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: alehamad <alehamad@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/02/03 22:49:00 by alehamad          #+#    #+#             */
+/*   Updated: 2026/02/03 22:51:36 by alehamad         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_H
 # define PHILO_H
 
@@ -37,6 +49,12 @@ typedef struct s_data
 	int				t_to_think;
 	int				nbr_eat;
 	int				dead;
+	int				threads_count;
+	int				mutex_count;
+	int				meal_count;
+	int				print_ok;
+	int				death_ok;
+	int				time_ok;
 	long long		t_start;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	print;
@@ -63,7 +81,7 @@ void		eat_philo(t_philo *philo);
 
 // utils
 void		my_usleep(long long duration_ms);
-long long	my_get_time();
+long long	my_get_time(void);
 void		my_free_data(t_data *data);
 
 #endif
