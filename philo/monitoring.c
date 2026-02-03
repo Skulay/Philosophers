@@ -6,7 +6,7 @@
 /*   By: alehamad <alehamad@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/03 14:40:27 by alehamad          #+#    #+#             */
-/*   Updated: 2026/02/03 22:51:33 by alehamad         ###   ########.fr       */
+/*   Updated: 2026/02/04 00:14:42 by alehamad         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,6 @@ void	monitor(t_data *data)
 			pthread_mutex_unlock(&data->death);
 			return ;
 		}
-		usleep(500);
+		usleep(10);
 	}
 }
