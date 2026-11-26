@@ -2,8 +2,10 @@ NAME	= philo
 
 CC		= cc
 CFLAGS	= -Wall -Wextra -Werror -pthread -g3
-HEADER  = philo.h
-SRCS	= main.c \
+
+SRC_DIR	= src
+HEADER	= $(SRC_DIR)/philo.h
+SRC		= main.c \
 			parsing.c \
 			philo.c \
 			time_sleep.c \
@@ -13,6 +15,7 @@ SRCS	= main.c \
 			utils.c \
 			free_destroy.c
 
+SRCS	= $(addprefix $(SRC_DIR)/, $(SRC))
 OBJS	= $(SRCS:.c=.o)
 
 all: $(NAME)
@@ -20,8 +23,8 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(SRC_DIR)/%.o: $(SRC_DIR)/%.c $(HEADER)
+	$(CC) $(CFLAGS) -I$(SRC_DIR) -c $< -o $@
 
 clean:
 	rm -f $(OBJS)
